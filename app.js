@@ -30,6 +30,7 @@ function About() {
   );
 }
 
+/*
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
 function Tasks() {
@@ -273,7 +274,8 @@ function Tasks() {
         )
   );
 }
-/*
+*/
+
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 function Tasks() {
@@ -550,7 +552,7 @@ function Tasks() {
         )
   );
 }
-*/
+
 
 
 
