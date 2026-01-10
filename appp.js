@@ -357,7 +357,7 @@ function Tasks() {
 
     let query = supabase
       .from("tasks")
-      .select("id, title, completed, pdf_path, created_at, user_id")
+      .select("id, title, completed, pdf_url, created_at, user_id")
       .order("created_at", { ascending: false });
 
     if (role !== "admin") {
@@ -422,7 +422,7 @@ function Tasks() {
 
       if (newPdfFile) {
         const path = await uploadPdf(newPdfFile, user.id, task.id);
-        await supabase.from("tasks").update({ pdf_path: path }).eq("id", task.id);
+        await supabase.from("tasks").update({ pdf_url: path }).eq("id", task.id);
       }
 
       setNewTitle("");
@@ -444,7 +444,7 @@ function Tasks() {
 
     setLoading(true);
     try {
-      let pdfPath = tasks.find(t => t.id === editingId)?.pdf_path || null;
+      let pdfPath = tasks.find(t => t.id === editingId)?.pdf_url || null;
 
       if (editPdfFile) {
         pdfPath = await uploadPdf(editPdfFile, user.id, editingId);
@@ -452,7 +452,7 @@ function Tasks() {
 
       await supabase
         .from("tasks")
-        .update({ title: editTitle.trim(), pdf_path: pdfPath })
+        .update({ title: editTitle.trim(), pdf_url: pdfPath })
         .eq("id", editingId);
 
       setEditingId(null);
@@ -519,11 +519,11 @@ function Tasks() {
           )
         : h("div", null,
             h("strong", null, task.title),
-            task.pdf_path &&
+            task.pdf_url &&
               h("button", {
                 style: { marginLeft: "1rem" },
                 onClick: async () => {
-                  const url = await getSignedUrl(task.pdf_path);
+                  const url = await getSignedUrl(task.pdf_url);
                   window.open(url, "_blank");
                 }
               }, "Xem PDF")
