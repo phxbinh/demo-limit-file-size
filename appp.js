@@ -67,6 +67,16 @@ async function uploadPdf(file, taskId) {
   return data.publicUrl;
 }
 
+function getPathFromPublicUrl(url) {
+  if (!url) return null;
+
+  // https://xxx.supabase.co/storage/v1/object/public/task-pdfs/123/abc.pdf
+  const idx = url.indexOf('/task-pdfs/');
+  if (idx === -1) return null;
+
+  return url.substring(idx + '/task-pdfs/'.length);
+}
+
 function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -162,21 +172,45 @@ function Tasks() {
     }
   }
 
-  async function deleteTask(task) {
-    try {
-      setLoading(true);
+  const deleteTask = async (task) => {
+  setLoading(true);
+  setMessage('');
 
-      if (task.pdf_url) await removePdfByUrl(task.pdf_url);
-      await supabase.from('tasks').delete().eq('id', task.id);
+  try {
+    // 1. XÓA PDF TRONG BUCKET
+    if (task.pdf_url) {
+      const filePath = getPathFromPublicUrl(task.pdf_url);
 
-      setTasks(tasks.filter(t => t.id !== task.id));
-      setMessage('Đã xóa task');
-    } catch (e) {
-      setMessage(e.message);
-    } finally {
-      setLoading(false);
+      if (filePath) {
+        const { error: storageError } = await supabase.storage
+          .from('task-pdfs')
+          .remove([filePath]);
+
+        if (storageError) {
+          console.error('Lỗi xoá PDF:', storageError);
+          throw new Error('Không xoá được file PDF');
+        }
+      }
     }
+
+    // 2. XÓA TASK TRONG DB
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', task.id);
+
+    if (error) throw error;
+
+    // 3. UPDATE UI
+    setTasks(tasks => tasks.filter(t => t.id !== task.id));
+    setMessage('Đã xoá task + PDF');
+
+  } catch (err) {
+    setMessage(err.message);
+  } finally {
+    setLoading(false);
   }
+};
 
   async function toggleCompleted(task) {
     await supabase
