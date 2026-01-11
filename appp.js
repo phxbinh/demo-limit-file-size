@@ -31,7 +31,7 @@ function About() {
 }
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-const BUCKET = 'task-pdfs';
+const BUCKET = 'user-pdfs';
 
 function getFilePathFromUrl(url) {
   if (!url) return null;
