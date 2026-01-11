@@ -1106,7 +1106,7 @@ window.App.Router.addRoute("/auth", AuthPage);
 window.App.Router.addRoute("/dashboard", Dashboard);
 window.App.Router.addRoute("/reset-password", ResetPasswordPage);
 window.App.Router.addRoute("/profile", ProfileEdit);
-window.App.Router.addRoute("/tasks", Tasks);
+window.App.Router.addRoute("/tasks", MyTasks);
 
 // Navbar đơn giản
 window.App.Router.navbarDynamic({
