@@ -432,7 +432,7 @@ function MyTasks() {
 function PublicTasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-
+/*
   useEffect(() => {
   let alive = true;
 
@@ -456,6 +456,25 @@ function PublicTasks() {
   fetchPublicTasks();
   return () => { alive = false };
 }, []);
+*/
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  async function fetchTasks() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('id,title,completed,pdf_url,created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) setMessage(error.message);
+    else setTasks(data || []);
+    setLoading(false);
+  }
+
+
 
   const TaskItem = ({ task }) => h('li', { class: 'task-item public' },
     h('div', null,
