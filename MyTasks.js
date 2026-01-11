@@ -8,51 +8,7 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 const BUCKET = 'user-pdfs';
 
-/*
-function getFilePathFromUrl(url) {
-  if (!url) return null;
-  try {
-    const urlObj = new URL(url);
-    let path = urlObj.pathname;
-    
-    // Bỏ phần bucket name nếu có trong path
-    if (path.startsWith(`/${BUCKET}/`)) {
-      path = path.substring(BUCKET.length + 2);
-    } else if (path.startsWith(`/${BUCKET}`)) {
-      path = path.substring(BUCKET.length + 1);
-    }
-    
-    // Loại bỏ dấu / đầu nếu còn
-    return path.startsWith('/') ? path.substring(1) : path;
-  } catch {
-    return null;
-  }
-}
-*/
 
-/*
-function getFilePathFromUrl(url) {
-  if (!url) return null;
-
-  try {
-    const { pathname } = new URL(url);
-
-    // Supabase public URL luôn có dạng:
-    // /storage/v1/object/public/<bucket>/<path>
-    const prefix = `/storage/v1/object/public/${BUCKET}/`;
-
-    if (!pathname.startsWith(prefix)) {
-      console.error("URL không đúng format Supabase:", pathname);
-      return null;
-    }
-
-    return pathname.slice(prefix.length);
-  } catch (err) {
-    console.error("Parse URL lỗi:", err);
-    return null;
-  }
-}
-*/
 
 function getFilePathFromUrl(url) {
   if (!url) return null;
