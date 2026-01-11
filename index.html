@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Framework + Supabase + vercel</title>
 
+<!-- Dùng cho appp.js --
 <link rel="stylesheet" href="tasks.css">
+<!---->
 
+<!-- Dùng cho Tasks.js -->
+<link rel="stylesheet" href="TasksStyle.css">
+<!---->
   <style>
 
   </style>
@@ -36,12 +41,16 @@
   // 🚀 SAU KHI SUPABASE READY → LOAD APP
 
   const script = document.createElement('script');
+  script.src = 'Tasks.js'; 
+  document.body.appendChild(script);
   
-  //script.src = 'test.js';
+  script.src = 'test.js';
   //script.src = 'app.js';
-  script.src = 'appp.js';
+  //script.src = 'appp.js';
   
   document.body.appendChild(script);
+  
+  
 </script>
 
 </body>
