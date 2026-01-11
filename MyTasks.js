@@ -429,34 +429,10 @@ function MyTasks() {
 
 
 // /tasks/public → PublicTasks
+/*
 function PublicTasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-/*
-  useEffect(() => {
-  let alive = true;
-
-  async function fetchPublicTasks() {
-    try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('id, title, pdf_url, created_at')
-        .eq('is_hidden', false)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      if (alive) setTasks(data || []);
-    } catch (e) {
-      console.error('Fetch public tasks error:', e);
-    } finally {
-      if (alive) setLoading(false);
-    }
-  }
-
-  fetchPublicTasks();
-  return () => { alive = false };
-}, []);
-*/
 
   useEffect(() => {
     fetchTasks();
@@ -494,8 +470,58 @@ function PublicTasks() {
       h('ul', null, tasks.map(TaskItem))
   );
 }
+*/
 
+function PublicTasks() {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  async function fetchTasks() {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('id,title,pdf_url,created_at')
+      .order('created_at', { ascending: false });
+
+    if (error) setMessage(error.message);
+    else setTasks(data || []);
+
+    setLoading(false);
+  }
+
+  /* ================= TaskItem ================= */
+
+  const TaskItem = (task) =>
+    h('li', { key: task.id },
+      h('span', null,
+        task.title,
+        task.pdf_url && h(
+          'a',
+          {
+            href: task.pdf_url,
+            target: '_blank',
+            style: 'margin-left:8px'
+          },
+          '[PDF]'
+        )
+      )
+    );
+
+  return h('div', null,
+    h('h2', null, 'Tasks + PDF'),
+
+    loading && h('p', null, 'Đang tải...'),
+    message && h('p', null, message),
+
+    h('ul', null, tasks.map(TaskItem))
+  );
+}
 
 
 
