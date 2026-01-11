@@ -438,7 +438,7 @@ function PublicTasks() {
       const { data, error } = await supabase
         .from('tasks')
         .select('id, title, pdf_url, created_at')
-        .eq('is_hidden', false)           // chỉ lấy task công khai
+        //.eq('is_hidden', false)           // chỉ lấy task công khai
         .order('created_at', { ascending: false });
 
       if (!error) setTasks(data || []);
