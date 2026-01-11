@@ -8,6 +8,7 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 const BUCKET = 'user-pdfs';
 
+/*
 function getFilePathFromUrl(url) {
   if (!url) return null;
   try {
@@ -23,6 +24,24 @@ function getFilePathFromUrl(url) {
     
     // Loại bỏ dấu / đầu nếu còn
     return path.startsWith('/') ? path.substring(1) : path;
+  } catch {
+    return null;
+  }
+}
+*/
+
+function getFilePathFromUrl(url) {
+  if (!url) return null;
+  try {
+    const { pathname } = new URL(url);
+
+    // tìm vị trí bucket trong path
+    const marker = `/public/${BUCKET}/`;
+    const idx = pathname.indexOf(marker);
+
+    if (idx === -1) return null;
+
+    return pathname.substring(idx + marker.length);
   } catch {
     return null;
   }
