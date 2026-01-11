@@ -32,17 +32,22 @@ function getFilePathFromUrl(url) {
 
 function getFilePathFromUrl(url) {
   if (!url) return null;
+
   try {
     const { pathname } = new URL(url);
 
-    // tìm vị trí bucket trong path
-    const marker = `/public/${BUCKET}/`;
-    const idx = pathname.indexOf(marker);
+    // Supabase public URL luôn có dạng:
+    // /storage/v1/object/public/<bucket>/<path>
+    const prefix = `/storage/v1/object/public/${BUCKET}/`;
 
-    if (idx === -1) return null;
+    if (!pathname.startsWith(prefix)) {
+      console.error("URL không đúng format Supabase:", pathname);
+      return null;
+    }
 
-    return pathname.substring(idx + marker.length);
-  } catch {
+    return pathname.slice(prefix.length);
+  } catch (err) {
+    console.error("Parse URL lỗi:", err);
     return null;
   }
 }
