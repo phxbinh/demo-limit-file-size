@@ -9,7 +9,7 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const BUCKET = 'user-pdfs';
 
 
-
+/*
 function getFilePathFromUrl(url) {
   if (!url) return null;
   try {
@@ -22,6 +22,32 @@ function getFilePathFromUrl(url) {
     if (idx === -1) return null;
 
     return pathname.substring(idx + marker.length);
+  } catch {
+    return null;
+  }
+}
+*/
+
+function getFilePathFromUrl(url) {
+  if (!url) return null;
+
+  try {
+    const { pathname } = new URL(url);
+
+    const markers = [
+      `/storage/v1/object/public/${BUCKET}/`,
+      `/storage/v1/object/sign/${BUCKET}/`,
+      `/storage/v1/object/${BUCKET}/`
+    ];
+
+    for (const marker of markers) {
+      const idx = pathname.indexOf(marker);
+      if (idx !== -1) {
+        return pathname.substring(idx + marker.length);
+      }
+    }
+
+    return null;
   } catch {
     return null;
   }
