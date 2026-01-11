@@ -434,18 +434,28 @@ function PublicTasks() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchPublicTasks() {
+  let alive = true;
+
+  async function fetchPublicTasks() {
+    try {
       const { data, error } = await supabase
         .from('tasks')
         .select('id, title, pdf_url, created_at')
-        //.eq('is_hidden', false)           // chỉ lấy task công khai
+        .eq('is_hidden', false)
         .order('created_at', { ascending: false });
 
-      if (!error) setTasks(data || []);
-      setLoading(false);
+      if (error) throw error;
+      if (alive) setTasks(data || []);
+    } catch (e) {
+      console.error('Fetch public tasks error:', e);
+    } finally {
+      if (alive) setLoading(false);
     }
-    fetchPublicTasks();
-  }, []);
+  }
+
+  fetchPublicTasks();
+  return () => { alive = false };
+}, []);
 
   const TaskItem = ({ task }) => h('li', { class: 'task-item public' },
     h('div', null,
