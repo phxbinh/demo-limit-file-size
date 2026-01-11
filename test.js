@@ -718,6 +718,7 @@ window.App.Router.addRoute("/auth", AuthPage);
 window.App.Router.addRoute("/dashboard", Dashboard);
 window.App.Router.addRoute("/reset-password", ResetPasswordPage);
 window.App.Router.addRoute("/profile", ProfileEdit);
+window.App.Router.addRoute("/tasks", Tasks);
 
 // Navbar đơn giản
 window.App.Router.navbarDynamic({
@@ -731,7 +732,8 @@ window.App.Router.navbarDynamic({
   },
     h(Link, { to: "/", style: { color: "white", margin: "0 1rem" }, children: "Home"}),
     h(Link, { to: "/auth", style: { color: "white", margin: "0 1rem" }, children: "Auth"}),
-    h(Link, { to: "/dashboard", style: { color: "white", margin: "0 1rem" }, children: "Dashboard" })
+    h(Link, { to: "/dashboard", style: { color: "white", margin: "0 1rem" }, children: "Dashboard" }),
+    h(Link, { to: "/tasks", style: { color: "white", margin: "0 1rem" }, children: "Tasks" })
   )
 });
 
