@@ -454,6 +454,7 @@ function PublicTasks() {
 }
 */
 
+
 function PublicTasks() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -479,6 +480,7 @@ function PublicTasks() {
 
   /* ================= TaskItem ================= */
 
+/*
   const TaskItem = (task) =>
     h('li', { key: task.id },
       h('span', null,
@@ -494,6 +496,25 @@ function PublicTasks() {
         )
       )
     );
+    
+*/
+
+    const TaskItem = (task) =>
+  h('li', { key: task.id, className: 'task-item' },
+    h('span', { className: 'task-title' }, task.title),
+
+    task.pdf_url && h(
+      'a',
+      {
+        href: task.pdf_url,
+        target: '_blank',
+        className: 'task-pdf'
+      },
+      'PDF'
+    )
+  );
+    
+    
 
   return h('div', null,
     h('h2', null, 'Tasks + PDF'),
@@ -501,7 +522,8 @@ function PublicTasks() {
     loading && h('p', null, 'Đang tải...'),
     message && h('p', null, message),
 
-    h('ul', null, tasks.map(TaskItem))
+    //h('ul', null, tasks.map(TaskItem))
+    h('ul', { className: 'task-list' }, tasks.map(TaskItem))
   );
 }
 
