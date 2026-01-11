@@ -508,6 +508,7 @@ function PublicTasks() {
       {
         href: task.pdf_url,
         target: '_blank',
+        download: '',
         className: 'task-pdf'
       },
       'PDF'
