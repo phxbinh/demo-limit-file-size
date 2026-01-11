@@ -27,7 +27,7 @@
 <!---->
 
 
-<!-- INIT SUPABASE TRƯỚC -->
+<!-- INIT SUPABASE TRƯỚC --
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -55,6 +55,35 @@
   
   
 </script>
+<!---->
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+window.supabase = createClient(
+    'https://defkqhylqphoqiikvbii.supabase.co',
+    'sb_publishable_vzdQpgqjLL2VE0Oyc0kEJQ_P8XqBwkh'
+  );
+
+  console.log('Supabase READY');
+
+  // 🚀 SAU KHI SUPABASE READY → LOAD APP
+
+  const script = document.createElement('script');
+  //script.src = 'Tasks.js'; 
+  //document.body.appendChild(script);
+  
+  //script.src = 'test.js';
+  //script.src = 'app.js';
+  //script.src = 'appp.js';
+
+  // Test db cho user logined success
+  script.src = 'MyTasks.js';
+  
+  document.body.appendChild(script);
+</script>
+
 
 </body>
 </html>
