@@ -30,6 +30,7 @@ function getFilePathFromUrl(url) {
 }
 */
 
+/*
 function getFilePathFromUrl(url) {
   if (!url) return null;
 
@@ -51,6 +52,25 @@ function getFilePathFromUrl(url) {
     return null;
   }
 }
+*/
+
+function getFilePathFromUrl(url) {
+  if (!url) return null;
+  try {
+    const { pathname } = new URL(url);
+
+    // tìm vị trí bucket trong path
+    const marker = `/public/${BUCKET}/`;
+    const idx = pathname.indexOf(marker);
+
+    if (idx === -1) return null;
+
+    return pathname.substring(idx + marker.length);
+  } catch {
+    return null;
+  }
+}
+
 
 async function removePdfByUrl(url) {
   const path = getFilePathFromUrl(url);
