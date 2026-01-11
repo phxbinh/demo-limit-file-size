@@ -59,6 +59,8 @@ function Tasks() {
   const [editTitle, setEditTitle] = useState('');
   const [editPdf, setEditPdf] = useState(null);
 
+const newFileInputRef = useRef(null);
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -107,6 +109,10 @@ function Tasks() {
       setTasks([{ ...task, pdf_url: pdfUrl }, ...tasks]);
       setNewTitle('');
       setNewPdf(null);
+      // Reset input file
+    if (newFileInputRef.current) {
+      newFileInputRef.current.value = '';
+    }
       setMessage('Thêm task thành công');
     } catch (e) {
       setMessage(e.message);
@@ -237,6 +243,7 @@ function Tasks() {
                 type: 'file',
                 accept: '.pdf',
                 class: 'file-input',
+                ref: newFileInputRef,
                 onChange: e => checkFile(e, setEditPdf)
               })
             ),
