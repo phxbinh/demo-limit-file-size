@@ -243,7 +243,6 @@ const newFileInputRef = useRef(null);
                 type: 'file',
                 accept: '.pdf',
                 class: 'file-input',
-                ref: newFileInputRef,
                 onChange: e => checkFile(e, setEditPdf)
               })
             ),
@@ -296,6 +295,7 @@ const newFileInputRef = useRef(null);
           type: 'file',
           accept: '.pdf',
           class: 'file-input',
+          ref: newFileInputRef,
           onChange: e => checkFile(e, setNewPdf)
         })
       ),
