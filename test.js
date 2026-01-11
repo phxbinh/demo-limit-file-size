@@ -116,30 +116,35 @@ const handleSubmit = async (e) => {
     setUsername('');
     setFullName('');
     setAvatarUrl('');
-  } catch (err) {
-/*
-    const message = err.message || 'Có lỗi xảy ra, vui lòng thử lại sau.';
-    setError(message);
-*/
-    console.error('Auth error:', err);
+    
+    
+} catch (err) {
+  console.error('Auth error:', err);
 
-if (err.message?.includes('profiles_username_unique')) {
-    setError('Username đã được sử dụng.');
-  } else if (err.message?.includes('User already registered')) {
-    setError('Email đã được đăng ký.');
-  } else {
-    setError('Có lỗi xảy ra, vui lòng thử lại.');
+  let errorMessage = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+
+  // Xử lý các trường hợp lỗi phổ biến từ Supabase Auth
+  if (err?.message?.includes('duplicate key') && err?.message?.includes('users_email_key')) {
+    errorMessage = 'Email này đã được đăng ký. Vui lòng sử dụng email khác.';
+  } 
+  else if (err?.message?.toLowerCase().includes('already registered')) {
+    errorMessage = 'Email này đã được đăng ký.';
+  }
+  else if (err?.message?.includes('profiles_username_unique') || 
+           err?.message?.includes('duplicate key') && err?.message?.includes('profiles_username_key')) {
+    errorMessage = 'Username đã được sử dụng. Vui lòng chọn tên khác.';
+  }
+  else if (err?.code === 'weak_password') {
+    errorMessage = 'Mật khẩu quá yếu. Vui lòng chọn mật khẩu mạnh hơn (ít nhất 6 ký tự, nên có chữ hoa, số...).';
+  }
+  else if (err?.message) {
+    errorMessage = err.message;
   }
 
-
-
-
-
-
-  } finally {
-    setLoading(false);
-  }
-};
+  setError(errorMessage);
+} finally {
+  setLoading(false);
+}
 
   const handleForgotPassword = async () => {
     if (!email) return alert("Vui lòng nhập email trước!");
