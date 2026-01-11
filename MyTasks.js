@@ -428,6 +428,66 @@ function MyTasks() {
 
 
 
+// /tasks/public → PublicTasks
+function PublicTasks() {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPublicTasks() {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('id, title, pdf_url, created_at')
+        .eq('is_hidden', false)           // chỉ lấy task công khai
+        .order('created_at', { ascending: false });
+
+      if (!error) setTasks(data || []);
+      setLoading(false);
+    }
+    fetchPublicTasks();
+  }, []);
+
+  const TaskItem = ({ task }) => h('li', { class: 'task-item public' },
+    h('div', null,
+      h('strong', null, task.title),
+      task.pdf_url && h('a', {
+        href: task.pdf_url,
+        target: '_blank',
+        download: true,
+        class: 'pdf-download'
+      }, 'Tải PDF')
+    )
+  );
+
+  return h('div', { class: 'public-tasks' },
+    h('h2', null, 'Tasks Công Khai'),
+    loading ? 'Đang tải...' :
+      h('ul', null, tasks.map(TaskItem))
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1151,6 +1211,7 @@ window.App.Router.addRoute("/dashboard", Dashboard);
 window.App.Router.addRoute("/reset-password", ResetPasswordPage);
 window.App.Router.addRoute("/profile", ProfileEdit);
 window.App.Router.addRoute("/tasks", MyTasks);
+window.App.Router.addRoute("/tasks/publictasks", PublicTasks);
 
 // Navbar đơn giản
 window.App.Router.navbarDynamic({
@@ -1165,7 +1226,8 @@ window.App.Router.navbarDynamic({
     h(Link, { to: "/", style: { color: "white", margin: "0 1rem" }, children: "Home"}),
     h(Link, { to: "/auth", style: { color: "white", margin: "0 1rem" }, children: "Auth"}),
     h(Link, { to: "/dashboard", style: { color: "white", margin: "0 1rem" }, children: "Dashboard" }),
-    h(Link, { to: "/tasks", style: { color: "white", margin: "0 1rem" }, children: "Tasks" })
+    h(Link, { to: "/tasks", style: { color: "white", margin: "0 1rem" }, children: "Tasks" }),
+    h(Link, { to: "/tasks/publictasks", style: { color: "white", margin: "0 1rem" }, children: "Public tasks" })
   )
 });
 
