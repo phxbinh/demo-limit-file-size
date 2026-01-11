@@ -119,7 +119,10 @@ const handleSubmit = async (e) => {
 
 
   } catch (err) {
-
+/*
+    const message = err.message || 'Có lỗi xảy ra, vui lòng thử lại sau.';
+    setError(message);
+*/
     console.error('Auth error:', err);
 
 if (err.message?.includes('profiles_username_unique')) {
@@ -360,21 +363,6 @@ function ChangePassword() {
         }
       }, loading ? "Đang đổi..." : "Đổi mật khẩu")
     )
-  );
-}
-
-
-// Welcome
-function WelcomePage() {
-  return h("div", { style: centerBox },
-    h("h2", null, "🎉 Đăng ký thành công!"),
-    h("p", null,
-      "Chúng tôi đã gửi email xác thực đến hộp thư của bạn."
-    ),
-    h("p", null,
-      "Vui lòng kiểm tra email và bấm vào link xác nhận."
-    ),
-    h(Link, { to: "/auth", children: "Quay lại đăng nhập" })
   );
 }
 
@@ -705,6 +693,10 @@ function ProfileEdit() {
 }
 
 
+
+
+
+
 // ====================
 // Home Page
 // ====================
@@ -712,9 +704,9 @@ function Home() {
   return h("div", { style: { padding: "2rem", textAlign: "center" } },
     h("h1", null, "Welcome to My App"),
     h("p", null, "Đây là trang chủ"),
-    h(Link, { to: "/auth", children: "Đi đến Đăng nhập / Đăng ký" }),
+    h(Link, { to: "/auth", children: "Đi đến Đăng nhập / Đăng ký"}),
     h("br"), h("br"),
-    h(Link, { to: "/dashboard", children: "Dashboard (yêu cầu đăng nhập)" })
+    h(Link, { to: "/dashboard", children: "Dashboard (yêu cầu đăng nhập)"})
   );
 }
 
@@ -726,7 +718,6 @@ window.App.Router.addRoute("/auth", AuthPage);
 window.App.Router.addRoute("/dashboard", Dashboard);
 window.App.Router.addRoute("/reset-password", ResetPasswordPage);
 window.App.Router.addRoute("/profile", ProfileEdit);
-window.App.Router.addRoute("/welcome", Welcome);
 
 // Navbar đơn giản
 window.App.Router.navbarDynamic({
