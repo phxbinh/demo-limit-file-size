@@ -28,6 +28,7 @@ function getFilePathFromUrl(url) {
 }
 */
 
+/*
 function getFilePathFromUrl(url) {
   if (!url) return null;
 
@@ -44,6 +45,51 @@ function getFilePathFromUrl(url) {
       const idx = pathname.indexOf(marker);
       if (idx !== -1) {
         return pathname.substring(idx + marker.length);
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+*/
+
+function getFilePathFromUrl(url) {
+  if (!url) return null;
+
+  try {
+    const { pathname } = new URL(url);
+
+    // Regex chung: match /storage/v1/object/(public|sign|authenticated)/bucket-name/(path/to/file)
+    const regex = /^\/storage\/v1\/object\/(public|sign|authenticated)\/([^/]+)\/(.+)$/;
+    const match = pathname.match(regex);
+
+    if (match) {
+      // match[1]: type (public/sign/authenticated)
+      // match[2]: bucket name
+      // match[3]: file path (còn lại)
+      return match[3];  // trả về path/to/file (không bao gồm bucket)
+    }
+
+    // Fallback cho các prefix cũ nếu cần
+    const markers = [
+      '/storage/v1/object/public/',
+      '/storage/v1/object/sign/',
+      '/storage/v1/object/authenticated/',
+      '/storage/v1/object/'  // fallback nếu bucket ở ngay sau object/
+    ];
+
+    for (const marker of markers) {
+      const idx = pathname.indexOf(marker);
+      if (idx !== -1) {
+        const remaining = pathname.substring(idx + marker.length);
+        // Bỏ bucket nếu có (tìm vị trí / đầu tiên sau marker)
+        const firstSlash = remaining.indexOf('/');
+        if (firstSlash !== -1) {
+          return remaining.substring(firstSlash + 1);
+        }
+        return remaining; // nếu không có bucket rõ ràng
       }
     }
 
