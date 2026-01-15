@@ -86,7 +86,7 @@ async function loadUsers() {
       throw new Error("Chưa đăng nhập");
     }
 
-    const res = await fetch("/api/users", {
+    const res = await fetch("/api/usersAdvance", {
       headers: {
         Authorization: `Bearer ${session.access_token}`
       }
