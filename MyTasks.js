@@ -1338,6 +1338,7 @@ window.App.Router.addRoute("/reset-password", ResetPasswordPage);
 window.App.Router.addRoute("/profile", ProfileEdit);
 window.App.Router.addRoute("/tasks", MyTasks);
 window.App.Router.addRoute("/tasks/publictasks", PublicTasks);
+window.App.Router.addRoute("/admin/role", AdminUsersPage);
 
 // Navbar đơn giản
 window.App.Router.navbarDynamic({
@@ -1353,7 +1354,8 @@ window.App.Router.navbarDynamic({
     h(Link, { to: "/auth", style: { color: "white", margin: "0 1rem" }, children: "Auth"}),
     h(Link, { to: "/dashboard", style: { color: "white", margin: "0 1rem" }, children: "Dashboard" }),
     h(Link, { to: "/tasks", style: { color: "white", margin: "0 1rem" }, children: "Tasks" }),
-    h(Link, { to: "/tasks/publictasks", style: { color: "white", margin: "0 1rem" }, children: "Public tasks" })
+    h(Link, { to: "/tasks/publictasks", style: { color: "white", margin: "0 1rem" }, children: "Public tasks" }),
+    h(Link, { to: "/admin/role", style: { color: "white", margin: "0 1rem" }, children: "Change role" })
   )
 });
 
