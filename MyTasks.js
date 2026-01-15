@@ -1304,170 +1304,6 @@ function ProfileEdit() {
 // ====================
 // Component AdminUsers (Quản lý người dùng - chỉ admin)
 // ====================
-function AdminUsers() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  // Lấy user hiện tại để check role
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Fetch role từ profiles (giả sử role lưu ở user_metadata hoặc profiles)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-        setCurrentUser({ ...user, role: profile?.role || 'user' });
-      }
-    };
-    getCurrentUser();
-  }, []);
-
-  // Fetch users nếu là admin
-  useEffect(() => {
-    if (currentUser) {
-      if (currentUser.role !== 'admin') {
-        setError('Bạn không có quyền truy cập trang này');
-        setLoading(false);
-        return;
-      }
-      fetchUsers();
-    }
-  }, [currentUser]);
-
-  async function fetchUsers() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, role, email, created_at') // Thay đổi fields nếu cần
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setUsers(data || []);
-    } catch (err) {
-      setError(err.message || 'Không tải được danh sách người dùng');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // Đổi role
-  const handleRoleChange = async (userId, newRole, selectEl) => {
-    const oldRole = users.find(u => u.id === userId)?.role;
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-      alert('Đổi role thành công');
-    } catch (err) {
-      alert('Lỗi: ' + (err.message || 'Không xác định'));
-      if (selectEl) selectEl.value = oldRole; // Rollback UI
-    }
-  };
-
-  // Xóa user (optimistic + rollback)
-  const handleDelete = async (userId, userEmail) => {
-    if (!confirm(`Xóa người dùng ${userEmail || 'này'}?`)) return;
-
-    const oldUsers = [...users];
-    setUsers(prev => prev.filter(u => u.id !== userId)); // Optimistic delete
-
-    try {
-      // Xóa user từ auth (yêu cầu quyền admin - nên dùng server-side thực tế)
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) throw authError;
-
-      // Xóa profile nếu cần
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) throw profileError;
-
-      alert('Xóa thành công');
-    } catch (err) {
-      setUsers(oldUsers); // Rollback
-      alert('Lỗi: ' + (err.message || 'Không xác định'));
-    }
-  };
-
-  if (loading) {
-    return h('div', { id: 'loading' }, 'Đang tải danh sách người dùng...');
-  }
-
-  if (error) {
-    return h('div', { style: { color: 'red' } }, error);
-  }
-
-  return h('div', { class: 'admin-users' },
-    h('h2', {}, 'Quản lý người dùng (Admin Only)'),
-    h('table', { id: 'user-table', style: { width: '100%', borderCollapse: 'collapse' } }, [
-      h('thead', {}, h('tr', {}, [
-        h('th', {}, 'Email'),
-        h('th', {}, 'Username'),
-        h('th', {}, 'Full Name'),
-        h('th', {}, 'Role'),
-        h('th', {}, 'Hành động')
-      ])),
-      h('tbody', { id: 'user-body' }, users.map(u => h('tr', { key: u.id }, [
-        h('td', {}, u.email),
-        h('td', {}, u.username),
-        h('td', {}, u.full_name),
-        h('td', {}, h('select', {
-          value: u.role,
-          onchange: (e) => handleRoleChange(u.id, e.target.value, e.target)
-        }, [
-          h('option', { value: 'user' }, 'User'),
-          h('option', { value: 'admin' }, 'Admin'),
-          h('option', { value: 'moderator' }, 'Moderator')
-        ])),
-        h('td', {}, h('button', { onclick: () => handleDelete(u.id, u.email) }, 'Xóa'))
-      ])))
-    ])
-  );
-}
-
-// ====================
-// Cập nhật Navbar để hiển thị link Admin nếu là admin
-// ====================
-let currentUserRole = 'user'; // Global var để track role
-
-supabase.auth.onAuthStateChange(async (event, session) => {
-  if (session?.user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single();
-    currentUserRole = profile?.role || 'user';
-  } else {
-    currentUserRole = 'user';
-  }
-  // Re-render navbar khi role change
-  window.App.Router.renderNavbar();
-});
-
-// Cập nhật navbarDynamic
-
-
-// ====================
-// Thêm route mới
-// ====================
-window.App.Router.addRoute("/admin/users", AdminUsers);
 
 
 
@@ -1504,7 +1340,6 @@ window.App.Router.addRoute("/tasks", MyTasks);
 window.App.Router.addRoute("/tasks/publictasks", PublicTasks);
 
 // Navbar đơn giản
-/*
 window.App.Router.navbarDynamic({
   navbar: () => h("nav", {
     style: {
@@ -1521,28 +1356,6 @@ window.App.Router.navbarDynamic({
     h(Link, { to: "/tasks/publictasks", style: { color: "white", margin: "0 1rem" }, children: "Public tasks" })
   )
 });
-*/
-
-window.App.Router.navbarDynamic({
-  navbar: () => h("nav", {
-    style: {
-      background: "#333",
-      color: "white",
-      padding: "1rem",
-      textAlign: "center"
-    }
-  },
-    h(Link, { to: "/", style: { color: "white", margin: "0 1rem" }, children: "Home"}),
-    h(Link, { to: "/auth", style: { color: "white", margin: "0 1rem" }, children: "Auth"}),
-    h(Link, { to: "/dashboard", style: { color: "white", margin: "0 1rem" }, children: "Dashboard" }),
-    h(Link, { to: "/tasks", style: { color: "white", margin: "0 1rem" }, children: "Tasks" }),
-    h(Link, { to: "/tasks/publictasks", style: { color: "white", margin: "0 1rem" }, children: "Public tasks" }),
-    currentUserRole === 'admin' && h(Link, { to: "/admin/users", style: { color: "white", margin: "0 1rem" }, children: "Admin Users" })
-  )
-});
-
-
-
 
 
 // ====================
