@@ -33,7 +33,7 @@
 <!---->
 
 
-<!-- INIT SUPABASE TRƯỚC -->
+<!-- INIT SUPABASE TRƯỚC --
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -91,6 +91,64 @@ window.supabase = createClient(
   document.body.appendChild(script);
 </script>
 <!---->
+
+
+<!-- INIT SUPABASE TRƯỚC -->
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabase = createClient(
+    'https://defkqhylqphoqiikvbii.supabase.co', 'sb_publishable_vzdQpgqjLL2VE0Oyc0kEJQ_P8XqBwkh'
+  );
+
+  // Lưu vào window nếu cần các file khác dùng (không khuyến khích lắm, tốt nhất dùng import)
+  window.supabase = supabase;
+
+  console.log('Supabase client initialized');
+
+  // Cách load script theo thứ tự và chờ nhau (cách đơn giản nhất)
+  async function loadScriptsInOrder() {
+    const scripts = [
+      'Admin.js',         // cần user để test db
+      'MyTasks.js'             // routing + UI cuối cùng
+    ];
+//      './framework/init_API.js',
+
+    for (const src of scripts) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        //script.type = 'module'; // rất quan trọng nếu file dùng import/export
+        script.src = src;
+        script.onload = () => {
+          console.log(`Loaded: ${src}`);
+          resolve();
+        };
+        script.onerror = () => {
+          console.error(`Failed to load: ${src}`);
+          reject();
+        };
+        document.body.appendChild(script);
+      });
+    }
+
+    console.log('All core scripts loaded!');
+    // Có thể dispatch event để báo cho app biết đã sẵn sàng
+    window.dispatchEvent(new Event('app:ready'));
+  }
+
+  // Chạy sau khi supabase sẵn sàng
+  loadScriptsInOrder().catch(err => {
+    console.error('Critical error loading application scripts', err);
+  });
+</script>
+
+
+
+
+
+
+
+
 
 </body>
 </html>
