@@ -1,5 +1,5 @@
 
-
+/*
 function ProductCard({ product }) {
   const { h } = window.App.VDOM;
   const { navigateTo } = window.App.Router;
@@ -50,7 +50,7 @@ function ProductListPage() {
     )// end map
   ));
 }
-
+*/
 /*
 css
 .product-grid {
@@ -66,3 +66,84 @@ css
 }
 
 */
+
+
+
+function ProductCard({ product }) {
+  //const { h } = window.App.VDOM;
+  //const { navigateTo } = window.App.Router;
+
+  return h(
+    "div",
+    {
+      className: "product-card",
+      onClick: () => navigateTo(`/product/${product.slug}`)
+    },
+    h("img", {
+      src: product.thumbnail_url || "/placeholder.png",
+      alt: product.name
+    }),
+    h("h3", {}, product.name),
+    product.min_price != null
+      ? h("p", { className: "price" },
+          `${Number(product.min_price).toLocaleString()} ₫`
+        )
+      : h("p", { className: "out-stock" }, "Hết hàng")
+  );
+}
+
+
+function ProductListPage() {
+  //const { h } = window.App.VDOM;
+  //const { useState, useEffect } = window.App.Hooks;
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchProducts() {
+      const { data, error } = await supabase
+        .from("public_products_with_price_view")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && mounted) {
+        setProducts(data || []);
+      }
+      setLoading(false);
+    }
+
+    fetchProducts();
+    return () => (mounted = false);
+  }, []);
+
+  if (loading) {
+    return h("p", {}, "Đang tải sản phẩm...");
+  }
+
+  return h(
+    "div",
+    {},
+    h("h3", {}, "Danh sách sản phẩm"),
+    h(
+      "div",
+      { className: "product-grid" },
+      products.length === 0
+        ? h("p", {}, "Chưa có sản phẩm")
+        : products.map(p =>
+            h(ProductCard, { key: p.id, product: p })
+          )
+    )
+  );
+}
+
+
+
+
+
+
+
+
+
