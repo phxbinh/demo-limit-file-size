@@ -124,8 +124,8 @@ export function ProductCreatePage() {
   return h("div", {}, [
     h("h2", {}, "Create Product (Supabase)"),
 
-    ProductSection({ product, setProduct }),
-    VariantsSection({ variants, setVariants }),
+    h(ProductSection, { product, setProduct }),
+    h(VaảiantsSection, { variants, setVariants }),
 
     h("button", { onclick: submit, disabled: loading },
       loading ? "Saving..." : "Save"
