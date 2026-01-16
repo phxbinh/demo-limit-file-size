@@ -1340,6 +1340,7 @@ window.App.Router.addRoute("/profile", ProfileEdit);
 window.App.Router.addRoute("/tasks", MyTasks);
 window.App.Router.addRoute("/tasks/publictasks", PublicTasks);
 window.App.Router.addRoute("/admin/role", AdminUsersPage);
+window.App.Router.addRoute("/admin/products/create", ProductCreatePage);
 
 // Navbar đơn giản
 window.App.Router.navbarDynamic({
