@@ -132,8 +132,9 @@ export function ProductCreatePage() {
     )
   ]);
 }
-
+/*
 window.App.Router.addRoute(
   "/admin/products/create",
   ProductCreatePage
 );
+*/
