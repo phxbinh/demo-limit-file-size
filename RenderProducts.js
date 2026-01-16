@@ -43,11 +43,12 @@ function ProductListPage() {
     fetchProducts();
   }, []);
 
-  return h("div", { className: "product-grid" },
-    products.map(p =>
+  return h('h3', null, 'Danh sách sản phẩm',
+    h("div", { className: "product-grid" },
+      ...products.map(p =>
       h(ProductCard, { key: p.id, product: p })
-    )
-  );
+    )// end map
+  ));
 }
 
 /*
