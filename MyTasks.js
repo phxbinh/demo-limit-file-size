@@ -1,6 +1,6 @@
 
 // Products.js
-/*
+
 // 2.2 Section Product
 function ProductSection({ product, setProduct }) {
   return h("section", { class: "card" }, [
@@ -99,7 +99,7 @@ async function createProductWithVariants(product, variants) {
 }
 
 // 4. Page hoàn chỉnh
-export function ProductCreatePage() {
+function ProductCreatePage() {
   const [product, setProduct] = useState({
     name: "",
     slug: "",
@@ -134,7 +134,7 @@ export function ProductCreatePage() {
     )
   ]);
 }
-*/
+
 
 /*
 window.App.Router.addRoute(
