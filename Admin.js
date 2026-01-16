@@ -31,7 +31,7 @@ function UserRoleEditor({ user, onChangeRole }) {
 
       h("button", {
         //disabled: nextRole === user.role,
-disabled: nextRole === user.role && nextRole === "-Select Role-",
+disabled: nextRole === user.role || nextRole === "-Select Role-",
         onClick: () => onChangeRole(user, nextRole),
         style: {
           padding: "4px 8px",
