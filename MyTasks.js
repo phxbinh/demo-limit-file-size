@@ -1342,6 +1342,7 @@ window.App.Router.addRoute("/tasks/publictasks", PublicTasks);
 window.App.Router.addRoute("/admin/role", AdminUsersPage);
 window.App.Router.addRoute("/admin/products/create", ProductCreatePage);
 window.App.Router.addRoute("/products", ProductListPage);
+window.App.Router.addRoute("/products/:slug", ProductDetailPage);
 
 // Navbar đơn giản
 window.App.Router.navbarDynamic({
