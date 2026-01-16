@@ -1356,7 +1356,8 @@ window.App.Router.navbarDynamic({
     h(Link, { to: "/dashboard", style: { color: "white", margin: "0 1rem" }, children: "Dashboard" }),
     h(Link, { to: "/tasks", style: { color: "white", margin: "0 1rem" }, children: "Tasks" }),
     h(Link, { to: "/tasks/publictasks", style: { color: "white", margin: "0 1rem" }, children: "Public tasks" }),
-    h(Link, { to: "/admin/role", style: { color: "white", margin: "0 1rem" }, children: "Change role" })
+    h(Link, { to: "/admin/role", style: { color: "white", margin: "0 1rem" }, children: "Change role" }),
+    h(Link, { to: "/admin/products/create", style: { color: "white", margin: "0 1rem" }, children: "Products" })
   )
 });
 
