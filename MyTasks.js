@@ -1,6 +1,6 @@
 
 // Products.js
-
+/*
 // 2.2 Section Product
 function ProductSection({ product, setProduct }) {
   return h("section", { class: "card" }, [
@@ -134,6 +134,8 @@ export function ProductCreatePage() {
     )
   ]);
 }
+*/
+
 /*
 window.App.Router.addRoute(
   "/admin/products/create",
