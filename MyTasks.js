@@ -127,7 +127,7 @@ function ProductCreatePage() {
     h("h2", {}, "Create Product (Supabase)"),
 
     h(ProductSection, { product, setProduct }),
-    h(VaảiantsSection, { variants, setVariants }),
+    h(VariantsSection, { variants, setVariants }),
 
     h("button", { onclick: submit, disabled: loading },
       loading ? "Saving..." : "Save"
