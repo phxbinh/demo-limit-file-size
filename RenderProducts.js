@@ -77,7 +77,7 @@ function ProductCard({ product }) {
     "div",
     {
       className: "product-card",
-      onClick: () => navigateTo(`/product/${product.slug}`)
+      onClick: () => navigateTo(`/products/${product.slug}`)
     },
     h("img", {
       src: product.thumbnail_url || "/placeholder.png",
