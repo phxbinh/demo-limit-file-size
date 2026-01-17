@@ -111,7 +111,8 @@ window.supabase = createClient(
   async function loadScriptsInOrder() {
     const scripts = [
       'Admin.js',         // cần user để test db
-      'Products.js',
+      //'Products.js',
+      'ProductCreate.js',
       'RenderProducts.js',
       'RenderDetailProduct.js',
       'MyTasks.js'             // routing + UI cuối cùng
