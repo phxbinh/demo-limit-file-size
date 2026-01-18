@@ -2,11 +2,11 @@
 // Product Create Page
 // Compatible with custom VDOM + Hooks + Router
 // ========================
-
+/*
 const { h } = window.App.VDOM;
 const { useState } = window.App.Hooks;
 const { navigateTo } = window.App.Router;
-
+*/
 // ========================
 // Section 1: Product Info
 // ========================
