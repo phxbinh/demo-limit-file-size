@@ -222,7 +222,7 @@ function buildPayload(product, variants, attributes) {
 // ========================
 // PAGE
 // ========================
-export function ProductCreatePage() {
+function ProductCreatePage() {
   const [product, setProduct] = useState({
     name: "",
     slug: "",
