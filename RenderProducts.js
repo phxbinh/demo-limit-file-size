@@ -105,7 +105,7 @@ function ProductListPage() {
 
     async function fetchProducts() {
       const { data, error } = await supabase
-        .from("public_products_with_price_view")
+        .from("public_products_view")
         .select("*")
         .order("created_at", { ascending: false });
 
