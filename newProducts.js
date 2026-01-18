@@ -252,7 +252,7 @@ function ProductCreatePage() {
       if (error) throw error;
 
       alert("Product created successfully");
-      navigateTo("/admin/products");
+      navigateTo("/");
     } catch (e) {
       alert(e.message);
     } finally {
