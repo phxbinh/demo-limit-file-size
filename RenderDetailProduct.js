@@ -12,11 +12,11 @@ function ProductDetailPage({ params }) {
   const [error, setError] = useState(null);
 
   // ────────────────────────────────────────────────
-  // Load dữ liệu sản phẩm + biến thể
+  // Load dữ liệu sản phẩm + biến thể (SỬA LOGIC EXTRACT DATA)
   // ────────────────────────────────────────────────
   useEffect(() => {
     if (!slug) {
-      setError("Không tìm thấy sản phẩm");
+      setError("Slug sản phẩm không hợp lệ");
       setLoading(false);
       return;
     }
@@ -26,31 +26,45 @@ function ProductDetailPage({ params }) {
         setLoading(true);
         setError(null);
 
-        // 1. Lấy thông tin sản phẩm chính
+        // 1. Lấy thông tin sản phẩm chính (SỬA: extract data đúng cách)
         const { data: productData, error: productError } = await supabase
           .from("products")
           .select("id, name, slug, thumbnail_url, description, category_id")
           .eq("slug", slug)
           .single();
 
-        if (productError || !productData) {
+        console.log("Debug - Product query result:", { productData, productError }); // Debug để check
+
+        if (productError) {
+          console.error("Supabase product error:", productError);
+          throw new Error(productError.message || "Lỗi tải sản phẩm");
+        }
+
+        if (!productData) {
+          console.warn("No product data found for slug:", slug);
           throw new Error("Không tìm thấy sản phẩm");
         }
 
         setProduct(productData);
 
-        // 2. Lấy tất cả biến thể + thuộc tính
+        // 2. Lấy tất cả biến thể + thuộc tính (nếu có product.id)
         const { data: variantRows, error: variantError } = await supabase
           .from("public_product_variants_with_attrs_view")
           .select("variant_id, price, stock, attribute_code, attribute_value")
           .eq("product_id", productData.id);
 
-        if (variantError) throw variantError;
+        console.log("Debug - Variants query result:", { variantRows, variantError }); // Debug
 
-        const grouped = groupVariants(variantRows);
-        setVariants(grouped);
+        if (variantError) {
+          console.error("Supabase variants error:", variantError);
+          throw new Error(variantError.message || "Lỗi tải biến thể");
+        }
+
+        const groupedVariants = groupVariants(variantRows || []);
+        setVariants(groupedVariants);
 
       } catch (err) {
+        console.error("Fetch error:", err); // Debug tổng
         setError(err.message || "Có lỗi khi tải dữ liệu");
       } finally {
         setLoading(false);
@@ -79,17 +93,16 @@ function ProductDetailPage({ params }) {
   }, [selectedAttrs, variants]);
 
   // ────────────────────────────────────────────────
-  // Computed values
+  // Computed values (SỬA: Xử lý trường hợp chưa chọn đủ attrs)
   // ────────────────────────────────────────────────
   const attributes = collectAttributes(variants);
-  const hasSelectedAllAttrs = Object.keys(attributes).every(code => 
-    selectedAttrs[code] !== undefined
-  );
+  const hasSelectedAllAttrs = Object.keys(attributes).length === 0 || 
+    Object.keys(attributes).every(code => selectedAttrs[code] !== undefined);
 
   const priceDisplay = selectedVariant
     ? `${Number(selectedVariant.price).toLocaleString('vi-VN')} ₫`
     : hasSelectedAllAttrs
-      ? "Hết hàng"
+      ? "Hết hàng"  // Nếu đã chọn đủ nhưng không match variant
       : "Vui lòng chọn đầy đủ tùy chọn";
 
   const stockDisplay = selectedVariant
@@ -99,7 +112,7 @@ function ProductDetailPage({ params }) {
     : null;
 
   // ────────────────────────────────────────────────
-  // Render
+  // Render (SỬA: Chỉ error nếu !product VÀ !loading)
   // ────────────────────────────────────────────────
   if (loading) {
     return h("div", { className: "product-detail-loading" },
@@ -108,10 +121,18 @@ function ProductDetailPage({ params }) {
     );
   }
 
-  if (error || !product) {
+  if (error) {  // SỬA: Chỉ check error, không check !product nữa vì đã handle trong fetch
     return h("div", { className: "product-detail-error" },
+      h("h2", {}, "Lỗi tải sản phẩm"),
+      h("p", {}, error),
+      h("a", { href: "/", className: "btn-back" }, "← Quay về trang chủ")
+    );
+  }
+
+  if (!product) {
+    return h("div", { className: "product-detail-not-found" },
       h("h2", {}, "Không tìm thấy sản phẩm"),
-      h("p", {}, error || "Sản phẩm có thể đã bị xóa hoặc không tồn tại."),
+      h("p", {}, "Sản phẩm có thể đã bị xóa hoặc slug không đúng."),
       h("a", { href: "/", className: "btn-back" }, "← Quay về trang chủ")
     );
   }
@@ -135,16 +156,15 @@ function ProductDetailPage({ params }) {
       h("div", { className: "product-info" },
         h("h1", { className: "product-title" }, product.name),
         
-        selectedVariant &&
-          h("div", { className: "product-price-block" },
-            h("span", { className: "current-price" }, priceDisplay),
-            stockDisplay && h("span", { className: "stock-info" }, stockDisplay)
-          )
+        h("div", { className: "product-price-block" },
+          h("span", { className: "current-price" }, priceDisplay),
+          stockDisplay && h("span", { className: "stock-info" }, stockDisplay)
+        )
       )
     ),
 
-    // Attribute selectors
-    h("div", { className: "attributes-section" },
+    // Attribute selectors (chỉ render nếu có attributes)
+    Object.keys(attributes).length > 0 && h("div", { className: "attributes-section" },
       ...Object.entries(attributes).map(([code, values]) =>
         h("div", { className: "attribute-group", key: code },
           h("label", { className: "attribute-label" }, code.toUpperCase()),
@@ -166,8 +186,7 @@ function ProductDetailPage({ params }) {
     product.description &&
       h("div", { className: "product-description" },
         h("h3", {}, "Mô tả sản phẩm"),
-        h("div", { innerHTML: product.description }) // nếu description là HTML
-        // hoặc nếu là text thuần: h("p", {}, product.description)
+        h("div", { className: "description-content" }, product.description)  // SỬA: Dùng text node nếu không phải HTML
       ),
 
     // Call to action
@@ -176,16 +195,17 @@ function ProductDetailPage({ params }) {
         className: `btn-add-to-cart ${!selectedVariant || selectedVariant.stock <= 0 ? "disabled" : ""}`,
         disabled: !selectedVariant || selectedVariant.stock <= 0,
         onclick: () => {
-          // Gọi hàm thêm vào giỏ hàng của bạn
-          window.App.Cart?.addItem?.(selectedVariant.id, 1);
+          if (selectedVariant) {
+            window.App.Cart?.addItem?.(selectedVariant.id, 1);
+          }
         }
-      }, "Thêm vào giỏ hàng")
+      }, selectedVariant ? "Thêm vào giỏ hàng" : "Chọn tùy chọn để mua")
     )
   );
 }
 
 // ────────────────────────────────────────────────
-// Helper functions (giữ nguyên logic nhưng viết sạch hơn)
+// Helper functions (không thay đổi)
 // ────────────────────────────────────────────────
 function groupVariants(rows = []) {
   const map = {};
