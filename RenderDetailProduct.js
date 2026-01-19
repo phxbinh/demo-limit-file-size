@@ -29,7 +29,7 @@ function ProductDetailPage({ params }) {
         // 1. Lấy thông tin sản phẩm chính (SỬA: extract data đúng cách)
         const { data: productData, error: productError } = await supabase
           .from("products")
-          .select("id, name, slug, thumbnail_url, description, category_id")
+          .select("id, name, slug, thumbnail_url, description")
           .eq("slug", slug)
           .single();
 
