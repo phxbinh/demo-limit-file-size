@@ -10,7 +10,7 @@
 /* Không cần sửa gì trong .product-card nữa (giữ nguyên code cũ của bạn) */
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 540px) {
   .products-grid {
     grid-template-columns: 1fr;           /* 1 cột trên mobile */
   }
