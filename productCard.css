@@ -1,6 +1,6 @@
 
 
-.products-grid {
+.product-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);   /* 2 cột bằng nhau */
   gap: 20px;                               /* khoảng cách ngang + dọc */
@@ -10,8 +10,8 @@
 /* Không cần sửa gì trong .product-card nữa (giữ nguyên code cũ của bạn) */
 
 /* Responsive */
-@media (max-width: 540px) {
-  .products-grid {
+@media (max-width: 640px) {
+  .product-grid {
     grid-template-columns: 1fr;           /* 1 cột trên mobile */
   }
 }
