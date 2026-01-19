@@ -1,127 +1,222 @@
 function ProductDetailPage({ params }) {
-  //const { h } = window.App.VDOM;
-  //const { useState, useEffect } = window.App.Hooks;
+  const { h } = window.App.VDOM;
+  const { useState, useEffect } = window.App.Hooks;
 
-  const slug = params.slug; // 🔥 LẤY Ở ĐÂY
+  const slug = params?.slug;
 
   const [product, setProduct] = useState(null);
   const [variants, setVariants] = useState([]);
   const [selectedAttrs, setSelectedAttrs] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // ────────────────────────────────────────────────
+  // Load dữ liệu sản phẩm + biến thể
+  // ────────────────────────────────────────────────
   useEffect(() => {
-    async function loadData() {
-      // 1️⃣ Load product
-      const { data: p } = await supabase
-        .from("products")
-        .select("*")
-        .eq("slug", slug)
-        .single();
-
-      if (!p) return;
-      setProduct(p);
-
-      // 2️⃣ Load variants + attributes
-      const { data: rows } = await supabase
-        .from("public_product_variants_with_attrs_view")
-        .select("*")
-        .eq("product_id", p.id);
-
-      setVariants(groupVariants(rows));
+    if (!slug) {
+      setError("Không tìm thấy sản phẩm");
+      setLoading(false);
+      return;
     }
 
-    loadData();
+    async function fetchProductDetail() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // 1. Lấy thông tin sản phẩm chính
+        const { data: productData, error: productError } = await supabase
+          .from("products")
+          .select("id, name, slug, thumbnail_url, description, category_id")
+          .eq("slug", slug)
+          .single();
+
+        if (productError || !productData) {
+          throw new Error("Không tìm thấy sản phẩm");
+        }
+
+        setProduct(productData);
+
+        // 2. Lấy tất cả biến thể + thuộc tính
+        const { data: variantRows, error: variantError } = await supabase
+          .from("public_product_variants_with_attrs_view")
+          .select("variant_id, price, stock, attribute_code, attribute_value")
+          .eq("product_id", productData.id);
+
+        if (variantError) throw variantError;
+
+        const grouped = groupVariants(variantRows);
+        setVariants(grouped);
+
+      } catch (err) {
+        setError(err.message || "Có lỗi khi tải dữ liệu");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProductDetail();
   }, [slug]);
 
-  // 3️⃣ Khi chọn attribute → tìm variant phù hợp
+  // ────────────────────────────────────────────────
+  // Tự động tìm variant khớp khi người dùng chọn thuộc tính
+  // ────────────────────────────────────────────────
   useEffect(() => {
-    if (!variants.length) return;
+    if (!variants.length || Object.keys(selectedAttrs).length === 0) {
+      setSelectedVariant(null);
+      return;
+    }
 
-    const found = variants.find(v =>
-      Object.entries(selectedAttrs).every(
-        ([k, val]) => v.attrs[k] === val
+    const matchedVariant = variants.find(variant =>
+      Object.entries(selectedAttrs).every(([attrCode, selectedVal]) => 
+        variant.attrs[attrCode] === selectedVal
       )
     );
 
-    setSelectedVariant(found || null);
+    setSelectedVariant(matchedVariant || null);
   }, [selectedAttrs, variants]);
 
-  if (!product) return h("p", {}, "Đang tải sản phẩm...");
-
+  // ────────────────────────────────────────────────
+  // Computed values
+  // ────────────────────────────────────────────────
   const attributes = collectAttributes(variants);
+  const hasSelectedAllAttrs = Object.keys(attributes).every(code => 
+    selectedAttrs[code] !== undefined
+  );
 
-  return h("div", { className: "product-detail" },
-    h("h1", {}, product.name),
+  const priceDisplay = selectedVariant
+    ? `${Number(selectedVariant.price).toLocaleString('vi-VN')} ₫`
+    : hasSelectedAllAttrs
+      ? "Hết hàng"
+      : "Vui lòng chọn đầy đủ tùy chọn";
 
-    h("img", {
-      src: product.thumbnail_url || "/placeholder.png",
-      className: "product-image"
-    }),
+  const stockDisplay = selectedVariant
+    ? selectedVariant.stock > 0
+      ? `Còn ${selectedVariant.stock} sản phẩm`
+      : "Hết hàng"
+    : null;
 
-    // ATTRIBUTE SELECTORS
-    ...Object.entries(attributes).map(([code, values]) =>
-      h("div", { className: "attr-group" },
-        h("label", {}, code.toUpperCase()),
-        h("div", { className: "attr-options" },
-          ...values.map(val =>
-            h("button", {
-              className:
-                selectedAttrs[code] === val ? "active" : "",
-              onClick: () =>
-                setSelectedAttrs({ ...selectedAttrs, [code]: val })
-            }, val)
+  // ────────────────────────────────────────────────
+  // Render
+  // ────────────────────────────────────────────────
+  if (loading) {
+    return h("div", { className: "product-detail-loading" },
+      h("div", { className: "spinner" }),
+      h("p", {}, "Đang tải thông tin sản phẩm...")
+    );
+  }
+
+  if (error || !product) {
+    return h("div", { className: "product-detail-error" },
+      h("h2", {}, "Không tìm thấy sản phẩm"),
+      h("p", {}, error || "Sản phẩm có thể đã bị xóa hoặc không tồn tại."),
+      h("a", { href: "/", className: "btn-back" }, "← Quay về trang chủ")
+    );
+  }
+
+  return h(
+    "div",
+    { className: "product-detail container" },
+
+    // Hero / Main image + name
+    h("div", { className: "product-hero" },
+      h("div", { className: "product-image-wrapper" },
+        h("img", {
+          src: product.thumbnail_url || "/assets/images/placeholder-large.svg",
+          alt: product.name,
+          className: "product-main-image",
+          loading: "lazy",
+          onerror: e => { e.target.src = "/assets/images/placeholder-large.svg"; }
+        })
+      ),
+
+      h("div", { className: "product-info" },
+        h("h1", { className: "product-title" }, product.name),
+        
+        selectedVariant &&
+          h("div", { className: "product-price-block" },
+            h("span", { className: "current-price" }, priceDisplay),
+            stockDisplay && h("span", { className: "stock-info" }, stockDisplay)
+          )
+      )
+    ),
+
+    // Attribute selectors
+    h("div", { className: "attributes-section" },
+      ...Object.entries(attributes).map(([code, values]) =>
+        h("div", { className: "attribute-group", key: code },
+          h("label", { className: "attribute-label" }, code.toUpperCase()),
+          h("div", { className: "attribute-options" },
+            ...values.map(value =>
+              h("button", {
+                key: value,
+                className: `attr-btn ${selectedAttrs[code] === value ? "active" : ""}`,
+                onclick: () => setSelectedAttrs(prev => ({ ...prev, [code]: value })),
+                type: "button"
+              }, value)
+            )
           )
         )
       )
     ),
 
-    // PRICE
-    h("div", { className: "price" },
-      selectedVariant
-        ? `${selectedVariant.price.toLocaleString()} ₫`
-        : "Vui lòng chọn đầy đủ thuộc tính"
-    ),
+    // Additional info (description, etc.)
+    product.description &&
+      h("div", { className: "product-description" },
+        h("h3", {}, "Mô tả sản phẩm"),
+        h("div", { innerHTML: product.description }) // nếu description là HTML
+        // hoặc nếu là text thuần: h("p", {}, product.description)
+      ),
 
-    // STOCK
-    selectedVariant && h("p", {},
-      selectedVariant.stock > 0
-        ? `Còn ${selectedVariant.stock} sản phẩm`
-        : "Hết hàng"
+    // Call to action
+    h("div", { className: "product-actions" },
+      h("button", {
+        className: `btn-add-to-cart ${!selectedVariant || selectedVariant.stock <= 0 ? "disabled" : ""}`,
+        disabled: !selectedVariant || selectedVariant.stock <= 0,
+        onclick: () => {
+          // Gọi hàm thêm vào giỏ hàng của bạn
+          window.App.Cart?.addItem?.(selectedVariant.id, 1);
+        }
+      }, "Thêm vào giỏ hàng")
     )
   );
 }
 
+// ────────────────────────────────────────────────
+// Helper functions (giữ nguyên logic nhưng viết sạch hơn)
+// ────────────────────────────────────────────────
 function groupVariants(rows = []) {
   const map = {};
 
-  rows.forEach(r => {
-    if (!map[r.variant_id]) {
-      map[r.variant_id] = {
-        id: r.variant_id,
-        price: r.price,
-        stock: r.stock,
+  for (const row of rows) {
+    const vid = row.variant_id;
+    if (!map[vid]) {
+      map[vid] = {
+        id: vid,
+        price: row.price,
+        stock: row.stock,
         attrs: {}
       };
     }
-    map[r.variant_id].attrs[r.attribute_code] = r.attribute_value;
-  });
+    map[vid].attrs[row.attribute_code] = row.attribute_value;
+  }
 
   return Object.values(map);
 }
 
 function collectAttributes(variants) {
-  const result = {};
+  const attrMap = {};
 
-  variants.forEach(v => {
-    Object.entries(v.attrs).forEach(([k, val]) => {
-      if (!result[k]) result[k] = new Set();
-      result[k].add(val);
-    });
-  });
+  for (const v of variants) {
+    for (const [code, value] of Object.entries(v.attrs)) {
+      if (!attrMap[code]) attrMap[code] = new Set();
+      attrMap[code].add(value);
+    }
+  }
 
-  Object.keys(result).forEach(k => {
-    result[k] = Array.from(result[k]);
-  });
-
-  return result;
+  return Object.fromEntries(
+    Object.entries(attrMap).map(([k, set]) => [k, [...set].sort()])
+  );
 }
